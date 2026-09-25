@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ngulik"
+version = "0.1.0"
+description = "Local-first iterative slang and keyword discovery for Indonesian text"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "djoov" }]
+keywords = ["nlp", "indonesian", "slang", "keyword-discovery", "tf-idf", "youtube-comments"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Indonesian",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+dependencies = [
+    "PyYAML>=6.0",
+    "requests>=2.31",
+    "click>=8.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/djoov/ngulik"
+Issues = "https://github.com/djoov/ngulik/issues"
+
+[project.optional-dependencies]
+# Stopword Bahasa Indonesia berkualitas lebih baik. Sistem tetap jalan tanpanya.
+id = ["Sastrawi>=1.0.1"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+ngulik = "ngulik.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ngulik*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,156 @@
+slang,normal
+# Kamus normalisasi slang Bahasa Indonesia (FR-004, langkah "Slang Normalization").
+# Format CSV dua kolom: bentuk slang -> bentuk baku. Baris '#' diabaikan.
+#
+# Pemetaan diterapkan pada level TOKEN, bukan substring, jadi "ke" di dalam
+# "kereta" tidak ikut berubah.
+#
+# Peringatan penting: JANGAN memetakan istilah yang justru sedang kamu teliti.
+# Normalisasi yang terlalu agresif akan mengolapskan variasi slang yang menjadi
+# tujuan utama sistem ini menemukannya. Isi di bawah dibatasi pada singkatan
+# umum yang netral terhadap topik apa pun.
+
+# --- pronomina & sapaan ---
+gw,saya
+gue,saya
+gua,saya
+aq,aku
+ak,aku
+sy,saya
+lu,kamu
+lo,kamu
+loe,kamu
+elu,kamu
+km,kamu
+kmu,kamu
+qt,kita
+dy,dia
+doi,dia
+mrk,mereka
+
+# --- singkatan fungsional ---
+yg,yang
+dg,dengan
+dgn,dengan
+utk,untuk
+untk,untuk
+krn,karena
+karna,karena
+krna,karena
+sdh,sudah
+udh,sudah
+udah,sudah
+dah,sudah
+blm,belum
+belom,belum
+blom,belum
+tdk,tidak
+gk,tidak
+ga,tidak
+gak,tidak
+nggak,tidak
+ngga,tidak
+enggak,tidak
+engga,tidak
+kagak,tidak
+jd,jadi
+jgn,jangan
+jangn,jangan
+bkn,bukan
+hrs,harus
+msh,masih
+bs,bisa
+bsa,bisa
+dpt,dapat
+tp,tapi
+tpi,tapi
+tapo,tapi
+klo,kalau
+kalo,kalau
+kl,kalau
+klu,kalau
+gmn,bagaimana
+gmna,bagaimana
+gimana,bagaimana
+knp,kenapa
+knpa,kenapa
+napa,kenapa
+sm,sama
+sma,sama
+dr,dari
+dri,dari
+kpd,kepada
+pd,pada
+org,orang
+orng,orang
+tmn,teman
+temen,teman
+skrg,sekarang
+skrang,sekarang
+skg,sekarang
+td,tadi
+bsk,besok
+kmrn,kemarin
+kmaren,kemarin
+nnti,nanti
+ntar,nanti
+bntr,sebentar
+sbntr,sebentar
+
+# --- intensitas & penilaian ---
+bgt,banget
+bngt,banget
+bgtt,banget
+bener,benar
+bner,benar
+emg,memang
+emang,memang
+mmg,memang
+bgs,bagus
+bagusss,bagus
+jelek,jelek
+mantep,mantap
+mantul,mantap
+kren,keren
+keren,keren
+parah,parah
+anjir,parah
+anjay,parah
+gokil,gila
+gila,gila
+gilaa,gila
+
+# --- lain-lain umum ---
+yaudah,ya sudah
+yodah,ya sudah
+gapapa,tidak apa-apa
+gpp,tidak apa-apa
+gppa,tidak apa-apa
+makasih,terima kasih
+mksh,terima kasih
+thx,terima kasih
+tq,terima kasih
+maaf,maaf
+sory,maaf
+sorry,maaf
+btw,ngomong-ngomong
+otw,dalam perjalanan
+kyk,seperti
+kyknya,sepertinya
+kayak,seperti
+kaya,seperti
+spt,seperti
+sprti,seperti
+bbrp,beberapa
+dll,dan lain-lain
+dsb,dan sebagainya
+tsb,tersebut
+yaa,ya
+yh,ya
+iyh,iya
+iya,iya
+iyaa,iya
+oke,ok
+okeh,ok
+okay,ok
+sip,ok

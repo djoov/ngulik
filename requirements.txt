@@ -1,0 +1,21 @@
+# Ngulik — dependencies
+#
+# Catatan desain: MVP ini sengaja TIDAK memakai pandas maupun scikit-learn.
+# TF-IDF dan co-occurrence ditulis manual (lihat ngulik/analysis/) karena
+# TfidfVectorizer punya tokenizer regex sendiri yang bentrok dengan tokenizer
+# Bahasa Indonesia + normalisasi slang di pipeline ini. Konsekuensinya: tidak
+# ada dependency compiled sama sekali, jadi project ini jalan di Python versi
+# apa pun >= 3.11 tanpa risiko gagal build wheel.
+
+# --- Wajib ---
+PyYAML>=6.0
+requests>=2.31
+click>=8.1
+
+# --- Opsional: kualitas stopword Bahasa Indonesia ---
+# Tanpa ini sistem tetap jalan memakai config/stopwords_id.txt.
+# Sastrawi adalah wheel pure-python (py2.py3-none-any), aman di Python 3.14.
+Sastrawi>=1.0.1
+
+# --- Opsional: testing ---
+pytest>=7.0

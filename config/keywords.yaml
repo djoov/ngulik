@@ -1,0 +1,29 @@
+# Seed keywords — FR-001
+#
+# Tiga tipe yang didukung: keywords (KEYWORD), phrases (PHRASE),
+# hashtags (HASHTAG). Muat ke database dengan:
+#
+#     python -m ngulik keyword import
+#
+# Import bersifat idempoten: menjalankannya dua kali tidak menduplikasi.
+# Keyword hasil approve dari iterasi berikutnya tersimpan di database,
+# bukan di file ini. Untuk melihat gabungan keduanya:
+#
+#     python -m ngulik keyword list
+#
+# AC-001 mensyaratkan minimal 5 seed keyword. Isi di bawah ini hanya
+# placeholder netral — ganti dengan topik yang benar-benar ingin kamu teliti.
+
+keywords:
+  - contoh_satu
+  - contoh_dua
+  - contoh_tiga
+  - contoh_empat
+  - contoh_lima
+
+phrases:
+  - "contoh frasa pertama"
+  - "contoh frasa kedua"
+
+hashtags:
+  - "#contoh"

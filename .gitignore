@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Data & artefak runtime (jangan di-commit)
+data/ngulik.db
+data/ngulik.db-journal
+data/ngulik.db-wal
+data/ngulik.db-shm
+data/ngulik.log
+data/exports/
+
+# Fixture TETAP di-commit supaya pipeline bisa diuji tanpa API key
+!data/fixtures/
+!data/fixtures/*.json
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Catatan kerja lokal untuk asisten AI (memuat path dan detail lingkungan
+# pribadi). Tetap ada di laptop, tidak ikut repo.
+CLAUDE.md

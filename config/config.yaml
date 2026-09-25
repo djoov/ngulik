@@ -1,0 +1,196 @@
+# Ngulik — Pipeline Configuration
+#
+# NFR-006: seluruh parameter utama dapat diubah dari sini tanpa menyentuh
+# source code. Nilai yang tidak dicantumkan akan memakai default di
+# ngulik/config.py (DEFAULTS), jadi file ini boleh dipangkas sebagian.
+
+project:
+  name: Ngulik
+  database: data/ngulik.db
+
+# ---------------------------------------------------------------------------
+# COLLECTION (FR-002)
+# ---------------------------------------------------------------------------
+collection:
+  default_source: file
+  default_limit: 500                 # maksimum komentar per `ngulik collect`
+
+  youtube:
+    # PENTING soal kuota. Dua bucket yang TERPISAH:
+    #   search.list         -> bucket sendiri, hanya 100 call/hari
+    #   commentThreads.list -> 1 unit dari pool 10.000 unit/hari
+    # Jadi mencari video itu LANGKA, mengambil komentar itu MURAH.
+    # Kuota reset tengah malam Pacific Time.
+    # Hasil search di-cache ke tabel `videos` supaya iterasi berikutnya
+    # tidak membakar ulang jatah 100 itu.
+    daily_search_quota: 100          # jatah search.list per hari, ditampilkan di `ngulik status`
+    max_search_calls_per_run: 10
+    max_videos_per_keyword: 25
+    max_comment_pages_per_video: 2   # 1 halaman = 100 komentar
+    # Untuk `collect --video URL`: video dipilih manusia, jadi ambil lebih dalam.
+    max_comment_pages_per_selected_video: 10
+    comments_per_page: 100
+    order: relevance                 # relevance | date | viewCount | rating
+    region_code: ID
+    relevance_language: id
+    published_after: null            # ISO-8601, mis. "2025-01-01T00:00:00Z"
+
+    # searchTerms memaksa komentar HARUS mengandung seed keyword.
+    # Default false secara sengaja: mengaktifkannya berarti sistem hanya
+    # menemukan kata yang sudah kita ketahui, yang justru mematikan tujuan
+    # keyword discovery (PRD 1.2). Nyalakan hanya untuk mode presisi tinggi.
+    use_search_terms: false
+
+    include_replies: true
+    request_timeout: 30
+    retry_attempts: 3
+    retry_backoff: 2.0
+
+  privacy:
+    # PRD 16 — data minimization. Nama tampilan komentator TIDAK PERNAH
+    # disimpan dalam kondisi apa pun. Flag ini hanya mengatur channel id,
+    # dan sebaiknya dibiarkan false.
+    store_author_id: false
+
+# ---------------------------------------------------------------------------
+# CLEANING (FR-004)
+# ---------------------------------------------------------------------------
+cleaning:
+  unicode_form: NFKC
+  lowercase: true
+  url_placeholder: ""              # string kosong = buang
+  mention_placeholder: ""
+  keep_hashtag_text: true          # "#gabut" -> token "gabut"
+  normalize_slang: true
+  slang_file: config/slang_id.csv
+  stopword_file: config/stopwords_id.txt
+  use_sastrawi_stopwords: true     # dipakai bila Sastrawi terpasang
+  max_repeated_chars: 2            # "bagusssss" -> "baguss"
+  min_token_length: 2
+  filter_stopwords: true
+
+  # Stemming SENGAJA dimatikan. Stemming mengolapskan variasi slang menjadi
+  # kata dasar, padahal variasi itulah yang ingin ditemukan sistem ini.
+  # Kalau dinyalakan, bentuk asli tetap ikut disimpan.
+  use_stemming: false
+
+  # Jumlah baris cleaned_comments per transaksi. Besar = cepat, kecil = hemat
+  # memori dan progres lebih sering tersimpan.
+  batch_size: 500
+
+# ---------------------------------------------------------------------------
+# DUPLICATE DETECTION (FR-005)
+# ---------------------------------------------------------------------------
+dedup:
+  enabled: true
+  near_duplicate: true
+  simhash_bits: 64
+  shingle_size: 3
+  hamming_threshold: 3             # makin kecil makin ketat
+  bands: 4                         # blocking, agar tidak O(n^2)
+
+# ---------------------------------------------------------------------------
+# SPAM FILTER
+# ---------------------------------------------------------------------------
+spam:
+  enabled: true
+  max_urls: 2
+  max_mentions: 5
+  max_hashtags: 5
+  min_tokens_after_clean: 2
+  min_token_diversity: 0.35        # unique_tokens / total_tokens
+  max_char_run: 10                 # "aaaaaaaaaaaa"
+  detect_phone_numbers: true       # pola "wa 08xx", umum di spam YouTube ID
+  copypasta_min_authors: 5         # teks identik dari >= N source_id berbeda
+
+# ---------------------------------------------------------------------------
+# ANALYSIS (PRD bagian 7)
+# ---------------------------------------------------------------------------
+analysis:
+  top_n: 100
+
+  ngram:
+    sizes: [1, 2, 3]
+    min_frequency: 3
+
+  tfidf:
+    sublinear_tf: true             # 1 + log(tf), meredam komentar panjang
+    smooth_idf: true               # log(1 + N/df), hindari bagi nol
+
+  cooccurrence:
+    window: 5
+    min_pair_frequency: 3
+    metric: pmi                    # pmi | npmi | raw
+
+# ---------------------------------------------------------------------------
+# DISCOVERY (PRD bagian 8)
+# ---------------------------------------------------------------------------
+discovery:
+  # Gate keras, diterapkan SEBELUM scoring.
+  min_doc_frequency: 3             # 500 kemunculan di 2 komentar = spam, bukan keyword
+  min_term_length: 3
+  max_candidates: 50
+
+  # Bobot dijumlah setelah tiap sinyal dinormalisasi min-max terhadap
+  # pool kandidat yang lolos gate. Total idealnya 1.0.
+  weights:
+    frequency: 0.25
+    tfidf: 0.35
+    cooccurrence: 0.30
+    ngram: 0.10
+
+  ngram_bonus: 1.0                 # nilai sinyal ngram untuk frasa multi-kata
+
+  # Kandidat yang pernah ditolak manusia tidak akan ditawarkan lagi di
+  # iterasi berikutnya. Tanpa ini, user mereview sampah yang sama tiap loop.
+  respect_previous_rejections: true
+
+# ---------------------------------------------------------------------------
+# LEXICON — kamus slang dari internet (CLAUDE.md Prioritas 8)
+# ---------------------------------------------------------------------------
+# Istilah dari kamus ini masuk sebagai kandidat PENDING, TIDAK langsung
+# menjadi seed. Gerbang review manusia tetap berlaku.
+lexicon:
+  # Jujur soal siapa kita. kbbj.web.id menolak (403) User-Agent yang
+  # menyamar sebagai browser, dan itu memang perilaku yang benar.
+  user_agent: "Ngulik/0.1 (riset keyword lokal; non-komersial)"
+  request_delay: 2.0               # detik antar-request ke situs yang sama
+  request_timeout: 30
+  retry_attempts: 3
+  retry_backoff: 2.0
+  respect_robots_txt: true
+  # Entri yang diambil kurang dari N hari lalu tidak diunduh ulang. lastmod di
+  # sitemap KBBJ tidak dipakai karena ikut berubah tiap sitemap dibuat ulang.
+  refetch_after_days: 30
+  max_entries_per_run: 200
+
+  # PRD 16 dan non-goal "bukan profiling individu": entri tentang orang
+  # sungguhan tidak diambil isinya. Nama kontributor tidak pernah disimpan.
+  exclude_categories:
+    - Nama Orang
+
+  sources:
+    kbbj:
+      enabled: true
+      base_url: https://kbbj.web.id
+      sitemap: https://kbbj.web.id/sitemap-words.xml
+
+# ---------------------------------------------------------------------------
+# UI — tampilan konsol ala msfconsole
+# ---------------------------------------------------------------------------
+# Efek dan warna otomatis mati bila output bukan terminal (di-pipe ke berkas
+# atau dijalankan dari skrip). Environment NO_COLOR juga mematikan warna.
+ui:
+  color: true
+  effects: true                    # banner baris-demi-baris, spinner saat boot
+  line_delay: 0.02                 # detik per baris banner
+  boot_delay: 0.6                  # lama spinner "starting console"
+  tips: true                       # "Ngulik tip:" acak di bawah banner
+  history_size: 200                # jumlah perintah yang diingat `history`
+
+# ---------------------------------------------------------------------------
+# LOGGING (NFR-005)
+# ---------------------------------------------------------------------------
+logging:
+  level: INFO
+  file: data/ngulik.log
